@@ -1,5 +1,7 @@
-(defproject lens-auth "0.1.0-SNAPSHOT"
-  :description "Authentication service like UserApp."
+(defproject lens-auth "0.1-SNAPSHOT"
+  :description "Central OAuth 2.0 Authorization Server for Lens."
+
+  :min-lein-version "2.0.0"
 
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.cli "0.3.1"]

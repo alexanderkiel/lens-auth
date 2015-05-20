@@ -1,9 +1,6 @@
-(ns lens.route
-  (:require [bidi.bidi :as bidi]))
+(ns lens.route)
 
-(def routes
-  ["/" {"token" :token
-        "introspect" :introspect}])
-
-(defn path-for [handler & params]
-  (apply bidi/path-for routes handler params))
+(defn routes [context-path]
+  [(if (= "/" context-path) "" context-path)
+   {"/token" :token
+    "/introspect" :introspect}])

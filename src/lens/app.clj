@@ -8,8 +8,10 @@
             [bidi.ring :as bidi-ring]
             [io.clojure.liberator-transit]))
 
-(defnk app [db]
-  (-> (bidi-ring/make-handler routes (handlers db))
-      (wrap-cors)
-      (wrap-keyword-params)
-      (wrap-params)))
+(defnk app [db context-path]
+  (assert (re-matches #"/(?:.*[^/])?" context-path))
+  (let [routes (routes context-path)]
+    (-> (bidi-ring/make-handler routes (handlers db))
+        (wrap-cors)
+        (wrap-keyword-params)
+        (wrap-params))))

@@ -1,5 +1,6 @@
 (defproject lens-auth "0.1-SNAPSHOT"
   :description "Central OAuth 2.0 Authorization Server for Lens."
+  :url "https://github.com/alexanderkiel/lens-auth"
 
   :min-lein-version "2.0.0"
 

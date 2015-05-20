@@ -8,10 +8,17 @@
             [bidi.ring :as bidi-ring]
             [io.clojure.liberator-transit]))
 
+(defn wrap-not-found [handler]
+  (fn [req]
+    (if-let [resp (handler req)]
+      resp
+      {:status 404})))
+
 (defnk app [db context-path]
   (assert (re-matches #"/(?:.*[^/])?" context-path))
   (let [routes (routes context-path)]
     (-> (bidi-ring/make-handler routes (handlers db))
+        (wrap-not-found)
         (wrap-cors)
         (wrap-keyword-params)
         (wrap-params))))

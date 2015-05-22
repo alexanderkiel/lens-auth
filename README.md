@@ -2,6 +2,8 @@ __This software is ALPHA, lacks documentation and has to be deployed in conjunct
 
 # Lens Auth Service
 
+[![Build Status](https://travis-ci.org/alexanderkiel/lens-auth.svg?branch=master)](https://travis-ci.org/alexanderkiel/lens-auth)
+
 Lens Auth is a central OAuth 2.0 authorization server for all Lens backend
 services.
 

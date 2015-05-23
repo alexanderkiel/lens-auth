@@ -35,7 +35,7 @@ environment vars specified above and just type `foreman start`.
 
 You have to start the auth container:
 
-    docker run -d -p 8080:8080 --name lens-auth akiel/lens-auth
+    docker run -d -p 8080:80 --name lens-auth akiel/lens-auth
 
 After starting the container, a `curl http://localhost:8080/token` should show
 `Method not allowed.` which is okay for the moment.

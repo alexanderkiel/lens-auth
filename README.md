@@ -31,6 +31,15 @@ This application uses the following environment vars:
 If you have [foreman][4] installed you can create an `.env` file listing the
 environment vars specified above and just type `foreman start`.
 
+## Usage through Docker Container
+
+You have to start the auth container:
+
+    docker run -d -p 8080:8080 --name lens-auth akiel/lens-auth
+
+After starting the container, a `curl http://localhost:8080/token` should show
+`Method not allowed.` which is okay for the moment.
+
 ## Develop
 
 Running a REPL will load the user namespace. Use `(startup)` to start the server

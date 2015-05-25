@@ -1,11 +1,10 @@
-__This software is ALPHA, lacks documentation and has to be deployed in conjunction with other Lens modules.__
+__Please start at the [Top-Level Lens Repo][5].__
 
 # Lens Auth Service
 
 [![Build Status](https://travis-ci.org/alexanderkiel/lens-auth.svg?branch=master)](https://travis-ci.org/alexanderkiel/lens-auth)
 
-Lens Auth is a central OAuth 2.0 authorization server for all Lens backend
-services.
+The central OAuth 2.0 authorization service for all Lens backend services.
 
 Lens auth currently supports only the Resource Owner Password Credentials Grant
 described in section [4.3][1] of the spec. An OAuth 2.0 compatible
@@ -54,4 +53,5 @@ Distributed under the Eclipse Public License, the same as Clojure.
 [1]: <http://tools.ietf.org/html/rfc6749#section-4.3>
 [2]: <http://tools.ietf.org/html/rfc6749#section-3.2>
 [3]: <https://tools.ietf.org/html/draft-ietf-oauth-introspection-08#section-2>
-[4]: https://github.com/ddollar/foreman
+[4]: <https://github.com/ddollar/foreman>
+[5]: <https://github.com/alexanderkiel/lens>

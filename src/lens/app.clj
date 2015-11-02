@@ -5,8 +5,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [lens.middleware.cors :refer [wrap-cors]]
-            [bidi.ring :as bidi-ring]
-            [io.clojure.liberator-transit]))
+            [bidi.ring :as bidi-ring]))
 
 (defn wrap-not-found [handler]
   (fn [req]

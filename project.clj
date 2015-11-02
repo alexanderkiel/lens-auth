@@ -6,7 +6,7 @@
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.clojure/tools.cli "0.3.1"]
+                 [environ "1.0.0"]
                  [org.clojure/tools.reader "0.9.2"]
                  [prismatic/plumbing "0.4.4"]
                  [http-kit "2.1.18"]

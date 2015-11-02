@@ -1,4 +1,4 @@
 (ns lens.util)
 
-(defn parse-int [s]
-  (Integer/parseInt s))
+(defn parse-long [s]
+  (Long/parseLong s))

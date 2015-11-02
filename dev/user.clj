@@ -1,11 +1,14 @@
 (ns user
-  (:require [clojure.tools.namespace.repl :refer [refresh]]
-            [system]))
+  (:require [clojure.pprint :refer [pprint pp]]
+            [clojure.repl :refer :all]
+            [clojure.tools.namespace.repl :refer [refresh]]
+            [environ.core :refer [env]]
+            [lens.system :as system]))
 
 (def system nil)
 
 (defn init []
-  (alter-var-root #'system #(if-not % (system/system (system/env)) %)))
+  (alter-var-root #'system #(if-not % (system/create env) %)))
 
 (defn start []
   (alter-var-root #'system system/start))
@@ -25,4 +28,3 @@
 (comment
   (startup)
   (reset))
-

@@ -2,11 +2,12 @@
   (:require [clojure.test :refer :all]
             [lens.handler :refer :all]
             [lens.test-util :refer :all]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [lens.store.atom :refer [->Atom]]))
 
 (deftest token-handler-test
   (let [db (atom {})
-        resp (execute (token-handler db) :post
+        resp (execute (token-handler (->Atom db)) :post
                :params {:grant_type "password"
                         :username "name-153440"
                         :password "pwd-153450"})]
@@ -26,7 +27,7 @@
 
 (deftest introspect-handler-test
   (let [db (atom {"token-160337" {:username "name-160347"}})
-        resp (execute (introspect-handler db) :post
+        resp (execute (introspect-handler (->Atom db)) :post
                :params {:token "token-160337"})]
 
     (is (= 200 (:status resp)))

@@ -1,7 +1,8 @@
 (ns lens.handler
   (:use plumbing.core)
   (:require [liberator.core :refer [resource]]
-            [liberator.representation :refer [as-response]])
+            [liberator.representation :refer [as-response]]
+            [lens.store :as store])
   (:import [java.util UUID]))
 
 (def resource-defaults
@@ -13,7 +14,7 @@
 
    :handle-unprocessable-entity (fnk [error] {:error error})})
 
-(defn token-handler [db]
+(defn token-handler [token-store]
   (resource
     resource-defaults
 
@@ -33,7 +34,7 @@
     :post!
     (fnk [[:request [:params username]]]
       (let [token (str (UUID/randomUUID))]
-        (swap! db #(assoc % token {:username username}))
+        (store/put! token-store token {:username username})
         {:token token}))
 
     :as-response
@@ -47,7 +48,7 @@
       {:access_token token
        :token_type "bearer"})))
 
-(defn introspect-handler [db]
+(defn introspect-handler [token-store]
   (resource
     resource-defaults
 
@@ -61,15 +62,15 @@
 
     :post!
     (fnk [[:request [:params token]]]
-      (if-let [user-info (get @db token)]
+      (if-letk [[username] (store/get token-store token)]
         {::resp
          {:active true
-          :username (:username user-info)}}
+          :username username}}
         {::resp
          {:active false}}))
 
     :handle-ok ::resp))
 
-(defn handlers [db]
-  {:token (token-handler db)
-   :introspect (introspect-handler db)})
+(defn handlers [token-store]
+  {:token (token-handler token-store)
+   :introspect (introspect-handler token-store)})

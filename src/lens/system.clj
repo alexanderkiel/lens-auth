@@ -2,7 +2,9 @@
   (:use plumbing.core)
   (:require [org.httpkit.server :refer [run-server]]
             [lens.util :refer [parse-long]]
-            [lens.app :refer [app]]))
+            [lens.app :refer [app]]
+            [lens.store.atom :refer [create-atom]]
+            [com.stuartsierra.component :as component]))
 
 (defn- ensure-facing-separator [path]
   (if (.startsWith path "/")
@@ -19,10 +21,14 @@
     path
     (-> path ensure-facing-separator remove-trailing-separator)))
 
+(defn- create-token-store [{:keys [token-store]}]
+  (case (some-> token-store .toLowerCase)
+    (create-atom)))
+
 (defn create [env]
   (-> (assoc env :app app)
       (assoc :version (:lens-auth-version env))
-      (assoc :db (atom {}))
+      (assoc :token-store (create-token-store env))
       (update :context-path (fnil parse-path "/"))
       (update :ip (fnil identity "0.0.0.0"))
       (update :port (fnil parse-long "80"))
@@ -30,7 +36,8 @@
 
 (defnk start [app port & more :as system]
   (assert (nil? (:stop-fn system)) "System already started.")
-  (let [stop-fn (run-server (app more) {:port port})]
+  (let [more (update more :token-store component/start)
+        stop-fn (run-server (app more) {:port port})]
     (assoc system :stop-fn stop-fn)))
 
 (defn stop [{:keys [stop-fn] :as system}]

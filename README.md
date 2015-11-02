@@ -27,6 +27,9 @@ This application uses the following environment vars:
 
 * `PORT` - the port to listen on
 * `CONTEXT_PATH` - an optional context path under which the workbook service runs
+* `TOKEN_STORE` - how to store the generated tokens. Currently `atom` and `riak` are supported
+* `RIAK_HOST` and `RIAK_PORT` - **Must** be specified if token-store is `riak`
+* `RIAK_BUCKET` - the name of the riak bucket to store generated tokens in (defaults to `auth`)
 
 If you have [foreman][4] installed you can create an `.env` file listing the
 environment vars specified above and just type `foreman start`.

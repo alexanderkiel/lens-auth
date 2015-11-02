@@ -21,6 +21,7 @@
    :port (or (some-> (env "PORT") (parse-int)) 5000)})
 
 (defnk start [app port & more :as system]
+  (assert (nil? (:stop-fn system)) "System already started.")
   (let [stop-fn (run-server (app (assoc more :db (atom {}))) {:port port})]
     (assoc system :stop-fn stop-fn)))
 

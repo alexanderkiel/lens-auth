@@ -5,8 +5,7 @@
 (def system nil)
 
 (defn init []
-  (assert (nil? system))
-  (alter-var-root #'system (constantly (system/system (system/env)))))
+  (alter-var-root #'system #(if-not % (system/system (system/env)) %)))
 
 (defn start []
   (alter-var-root #'system system/start))

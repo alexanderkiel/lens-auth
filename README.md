@@ -3,6 +3,7 @@ __Please start at the [Top-Level Lens Repo][5].__
 # Lens Auth Service
 
 [![Build Status](https://travis-ci.org/alexanderkiel/lens-auth.svg?branch=master)](https://travis-ci.org/alexanderkiel/lens-auth)
+[![Docker Pulls](https://img.shields.io/docker/pulls/akiel/lens-auth.svg)](https://hub.docker.com/r/akiel/lens-auth/)
 
 The central OAuth 2.0 authorization service for all Lens backend services.
 

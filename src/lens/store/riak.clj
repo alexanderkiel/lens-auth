@@ -1,9 +1,12 @@
 (ns lens.store.riak
+  (:use plumbing.core)
   (:require [lens.store :refer [TokenStore]]
             [org.httpkit.client :as http]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [lens.util :refer [now]]
+            [lens.store.expire :refer [expired? Sec]]))
 
 (defn- riak-endpoint [host port]
   (str "http://" host ":" port "/riak"))
@@ -24,7 +27,11 @@
     (when (= (:status response) 200)
       (json/read-str (:body response) :key-fn keyword))))
 
-(deftype Riak [endpoint bucket]
+(defn- riak-delete! [endpoint bucket key]
+  (let [key-url (riak-key [endpoint bucket key])]
+    @(http/delete key-url)))
+
+(deftype Riak [endpoint bucket expire]
   component/Lifecycle
   (start [this]
     this)
@@ -33,11 +40,15 @@
 
   TokenStore
   (put! [_ token user-info]
-    (riak-put! endpoint bucket token user-info))
+    (->> (assoc user-info :expires (+ (now) expire))
+         (riak-put! endpoint bucket token)))
   (get [_ token]
-    (riak-get endpoint bucket token))
+    (let [user-info (riak-get endpoint bucket token)]
+      (if (expired? user-info)
+        (do (riak-delete! endpoint bucket token) nil)
+        user-info)))
   (describe [_]
     (str "riak endpoint: " endpoint ", bucket: " bucket)))
 
-(defn create-riak [host port bucket]
-  (->Riak (riak-endpoint host port) bucket))
+(defnk create-riak [riak-host riak-port riak-bucket expire :- Sec]
+  (->Riak (riak-endpoint riak-host riak-port) riak-bucket (* expire 1000)))

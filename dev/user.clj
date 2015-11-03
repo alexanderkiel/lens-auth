@@ -3,7 +3,10 @@
             [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
             [environ.core :refer [env]]
-            [lens.system :as system]))
+            [lens.system :as system]
+            [schema.core :as s]))
+
+(s/set-fn-validation! true)
 
 (def system nil)
 

@@ -1,21 +1,31 @@
 (ns lens.store.atom
+  (:use plumbing.core)
   (:require [lens.store :refer [TokenStore]]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [lens.util :refer [now]]
+            [lens.store.expire :refer [expired? Sec]]))
 
-(deftype Atom [db]
+(deftype Atom [expire db]
   component/Lifecycle
   (start [_]
-    (Atom. (atom {})))
+    (Atom. expire (atom {})))
+
   (stop [_]
-    (Atom. nil))
+    (Atom. expire nil))
 
   TokenStore
   (put! [_ token user-info]
-    (swap! db #(assoc % token user-info)))
+    (let [expires (+ (now) expire)
+          value (assoc user-info :expires expires)]
+      (swap! db #(assoc % token value))))
+
   (get [_ token]
-    (get-in @db [token]))
+    (let [user-info (get-in @db [token])]
+      (if (expired? user-info)
+        (do (swap! db #(dissoc % token)) nil)
+        user-info)))
   (describe [_]
     "in-memory atom (ephemeral)"))
 
-(defn create-atom []
-  (->Atom nil))
+(defnk create-atom [expire :- Sec]
+  (->Atom (* expire 1000) nil))

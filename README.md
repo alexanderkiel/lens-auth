@@ -28,8 +28,9 @@ This application uses the following environment vars:
 * `PORT` - the port to listen on
 * `CONTEXT_PATH` - an optional context path under which the workbook service runs
 * `TOKEN_STORE` - how to store the generated tokens. Currently `atom` and `riak` are supported
-* `RIAK_HOST` and `RIAK_PORT` - **Must** be specified if token-store is `riak`
-* `RIAK_BUCKET` - the name of the riak bucket to store generated tokens in (defaults to `auth`)
+* `RIAK_HOST` - **Must** be specified if token-store is `riak`
+* `RIAK_PORT` - the Riak HTTP port (defaults to `8098`)
+* `RIAK_BUCKET` - the name of the Riak bucket to store generated tokens in (defaults to `auth`)
 * `EXPIRE` - the time in seconds after which a token expires
 
 If you have [foreman][4] installed you can create an `.env` file listing the

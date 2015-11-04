@@ -34,6 +34,7 @@
   (-> (assoc env :app app)
       (assoc :version (:lens-auth-version env))
       (update :expire (fnil parse-long "3600"))
+      (update :riak-port (fnil parse-long "8098"))
       (update :riak-bucket (fnil identity "auth"))
       (assoc-token-store)
       (update :context-path (fnil parse-path "/"))

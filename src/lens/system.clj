@@ -22,15 +22,20 @@
     path
     (-> path ensure-facing-separator remove-trailing-separator)))
 
-(defn- create-token-store [{:keys [token-store riak-host riak-port riak-bucket]}]
+(defn- create-token-store [{:keys [token-store] :as env}]
   (case (some-> token-store .toLowerCase)
-    "riak" (create-riak riak-host riak-port (or riak-bucket "auth"))
-    (create-atom)))
+    "riak" (create-riak env)
+    (create-atom env)))
+
+(defn- assoc-token-store [env]
+  (assoc env :token-store (create-token-store env)))
 
 (defn create [env]
   (-> (assoc env :app app)
       (assoc :version (:lens-auth-version env))
-      (assoc :token-store (create-token-store env))
+      (update :expire (fnil parse-long "3600"))
+      (update :riak-bucket (fnil identity "auth"))
+      (assoc-token-store)
       (update :context-path (fnil parse-path "/"))
       (update :ip (fnil identity "0.0.0.0"))
       (update :port (fnil parse-long "80"))

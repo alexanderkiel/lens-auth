@@ -6,7 +6,8 @@
             [lens.store.atom :refer [create-atom]]
             [lens.store.riak :refer [create-riak]]
             [com.stuartsierra.component :as component]
-            [lens.auth.noop :refer [create-noop]]))
+            [lens.auth.noop :refer [create-noop]]
+            [lens.auth.ldap :refer [create-ldap]]))
 
 (defn- ensure-facing-separator [path]
   (if (.startsWith path "/")
@@ -31,8 +32,9 @@
 (defn- assoc-token-store [env]
   (assoc env :token-store (create-token-store env)))
 
-(defn- create-authenticator [{:keys [auth]}]
+(defn- create-authenticator [{:keys [auth] :as env}]
   (case (some-> auth .toLowerCase)
+    "ldap" (create-ldap env)
     (create-noop)))
 
 (defn- assoc-authenticator [env]

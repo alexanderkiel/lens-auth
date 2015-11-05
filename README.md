@@ -32,6 +32,9 @@ This application uses the following environment vars:
 * `RIAK_PORT` - the Riak HTTP port (defaults to `8098`)
 * `RIAK_BUCKET` - the name of the Riak bucket to store generated tokens in (defaults to `auth`)
 * `EXPIRE` - the time in seconds after which a token expires
+* `AUTH` - how to check user credentials, currently `noop` (all credentials are valid) and `ldap` are supported
+* `LDAP_HOSTS` - the host or hosts (comma separated) to use for ldap connect, **must** be specified if auth is `ldap`
+* `LDAP_USER_BASE_DN` - the ldap base [dn](https://www.ldap.com/ldap-dns-and-rdns) to locate users,**must** be specified if auth is `ldap`
 
 If you have [foreman][4] installed you can create an `.env` file listing the
 environment vars specified above and just type `foreman start`.

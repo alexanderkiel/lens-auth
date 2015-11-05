@@ -3,5 +3,4 @@
 
 (defprotocol TokenStore
   (put! [this token user-info])
-  (get [this token])
-  (describe [this]))
+  (get [this token]))

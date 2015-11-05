@@ -2,7 +2,7 @@
   (:use plumbing.core)
   (:require [environ.core :refer [env]]
             [lens.system :as system]
-            [lens.store :refer [describe]]))
+            [lens.descriptive :refer [describe]]))
 
 (defn- max-memory []
   (quot (.maxMemory (Runtime/getRuntime)) (* 1024 1024)))

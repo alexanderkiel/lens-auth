@@ -1,6 +1,7 @@
 (ns lens.store.atom
   (:use plumbing.core)
   (:require [lens.store :refer [TokenStore]]
+            [lens.descriptive :refer [Descriptive]]
             [com.stuartsierra.component :as component]
             [lens.util :refer [now]]
             [lens.store.expire :refer [expired? Sec]]))
@@ -24,6 +25,8 @@
       (if (expired? user-info)
         (do (swap! db #(dissoc % token)) nil)
         user-info)))
+
+  Descriptive
   (describe [_]
     "in-memory atom (ephemeral)"))
 

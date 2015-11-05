@@ -1,8 +1,9 @@
 (ns lens.handler
   (:use plumbing.core)
   (:require [liberator.core :refer [resource]]
-            [liberator.representation :refer [as-response]]
-            [lens.store :as store])
+            [liberator.representation :refer [as-response ring-response]]
+            [lens.store :as store]
+            [lens.auth :as auth])
   (:import [java.util UUID]))
 
 (def resource-defaults
@@ -12,24 +13,29 @@
    :new? false
    :respond-with-entity? true
 
-   :handle-unprocessable-entity (fnk [error] {:error error})})
+   :handle-unprocessable-entity
+   (fnk [error]
+     ;Workaround for https://github.com/clojure-liberator/liberator/issues/94
+     (ring-response {:error error} {:status 400}))})
 
-(defn token-handler [token-store]
+(defnk token-handler [token-store authenticator]
   (resource
     resource-defaults
 
     :processable?
     (fnk [[:request params]]
-      (cond
-        (or (nil? (:grant_type params))
-            (nil? (:username params))
-            (nil? (:password params)))
-        [false {:error "invalid_request"}]
+      (let [{:keys [grant_type username password]} params]
+        (cond
+          (not (and grant_type username password))
+          [false {:error "invalid_request"}]
 
-        (not= "password" (:grant_type params))
-        [false {:error "unsupported_grant_type"}]
+          (not= "password" grant_type)
+          [false {:error "unsupported_grant_type"}]
 
-        :else true))
+          (not (auth/check-credentials authenticator username password))
+          [false {:error "invalid_grant"}]
+
+          :else true)))
 
     :post!
     (fnk [[:request [:params username]]]
@@ -48,7 +54,7 @@
       {:access_token token
        :token_type "bearer"})))
 
-(defn introspect-handler [token-store]
+(defnk introspect-handler [token-store]
   (resource
     resource-defaults
 
@@ -71,6 +77,6 @@
 
     :handle-ok ::resp))
 
-(defn handlers [token-store]
-  {:token (token-handler token-store)
-   :introspect (introspect-handler token-store)})
+(defn handlers [ctx]
+  {:token (token-handler ctx)
+   :introspect (introspect-handler ctx)})

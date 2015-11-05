@@ -13,10 +13,11 @@
       resp
       {:status 404})))
 
-(defnk app [context-path token-store]
+(defnk app [context-path token-store authenticator]
   (assert (re-matches #"/(?:.*[^/])?" context-path))
-  (let [routes (routes context-path)]
-    (-> (bidi-ring/make-handler routes (handlers token-store))
+  (let [routes (routes context-path)
+        ctx {:token-store token-store :authenticator authenticator}]
+    (-> (bidi-ring/make-handler routes (handlers ctx))
         (wrap-not-found)
         (wrap-cors)
         (wrap-keyword-params)

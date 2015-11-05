@@ -15,7 +15,8 @@
                  [bidi "1.20.2" :exclusions [org.clojure/clojurescript
                                              com.cemerick/clojurescript.test]]
                  [liberator "0.13"]
-                 [com.stuartsierra/component "0.3.0"]]
+                 [com.stuartsierra/component "0.3.0"]
+                 [org.clojars.akiel/clj-ldap "0.0.10"]]
 
   :profiles {:dev
              {:source-paths ["dev"]

@@ -1,6 +1,7 @@
 (ns lens.store.riak
   (:use plumbing.core)
   (:require [lens.store :refer [TokenStore]]
+            [lens.descriptive :refer [Descriptive]]
             [org.httpkit.client :as http]
             [clojure.string :as str]
             [com.stuartsierra.component :as component]
@@ -47,6 +48,8 @@
       (if (expired? user-info)
         (do (riak-delete! endpoint bucket token) nil)
         user-info)))
+
+  Descriptive
   (describe [_]
     (str "riak endpoint: " endpoint ", bucket: " bucket)))
 

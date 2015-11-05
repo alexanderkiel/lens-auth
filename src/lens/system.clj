@@ -5,7 +5,8 @@
             [lens.app :refer [app]]
             [lens.store.atom :refer [create-atom]]
             [lens.store.riak :refer [create-riak]]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component]
+            [lens.auth.noop :refer [create-noop]]))
 
 (defn- ensure-facing-separator [path]
   (if (.startsWith path "/")
@@ -30,6 +31,13 @@
 (defn- assoc-token-store [env]
   (assoc env :token-store (create-token-store env)))
 
+(defn- create-authenticator [{:keys [auth]}]
+  (case (some-> auth .toLowerCase)
+    (create-noop)))
+
+(defn- assoc-authenticator [env]
+  (assoc env :authenticator (create-authenticator env)))
+
 (defn create [env]
   (-> (assoc env :app app)
       (assoc :version (:lens-auth-version env))
@@ -37,6 +45,7 @@
       (update :riak-port (fnil parse-long "8098"))
       (update :riak-bucket (fnil identity "auth"))
       (assoc-token-store)
+      (assoc-authenticator)
       (update :context-path (fnil parse-path "/"))
       (update :ip (fnil identity "0.0.0.0"))
       (update :port (fnil parse-long "80"))
@@ -45,6 +54,7 @@
 (defnk start [app port & more :as system]
   (assert (nil? (:stop-fn system)) "System already started.")
   (let [more (update more :token-store component/start)
+        more (update more :authenticator component/start)
         stop-fn (run-server (app more) {:port port})]
     (assoc system :stop-fn stop-fn)))
 

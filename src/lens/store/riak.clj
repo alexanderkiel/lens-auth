@@ -36,18 +36,20 @@
   component/Lifecycle
   (start [this]
     this)
+
   (stop [this]
     this)
 
   TokenStore
-  (put-token! [_ token user-info]
-    (->> (assoc user-info :expires (+ (now) expire))
-         (riak-put! endpoint bucket token)))
   (get-token [_ token]
     (let [user-info (riak-get endpoint bucket token)]
       (if (expired? user-info)
         (do (riak-delete! endpoint bucket token) nil)
         user-info)))
+
+  (put-token! [_ token user-info]
+    (->> (assoc user-info :expires (+ (now) expire))
+         (riak-put! endpoint bucket token)))
 
   Descriptive
   (describe [_]

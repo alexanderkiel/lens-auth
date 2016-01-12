@@ -15,16 +15,16 @@
     (Atom. expire nil))
 
   TokenStore
-  (put-token! [_ token user-info]
-    (let [expires (+ (now) expire)
-          value (assoc user-info :expires expires)]
-      (swap! db #(assoc % token value))))
-
   (get-token [_ token]
     (let [user-info (get-in @db [token])]
       (if (expired? user-info)
         (do (swap! db #(dissoc % token)) nil)
         user-info)))
+
+  (put-token! [_ token user-info]
+    (let [expires (+ (now) expire)
+          value (assoc user-info :expires expires)]
+      (swap! db #(assoc % token value))))
 
   Descriptive
   (describe [_]

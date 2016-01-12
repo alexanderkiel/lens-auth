@@ -3,63 +3,27 @@
   (:require [org.httpkit.server :refer [run-server]]
             [lens.util :refer [parse-long]]
             [lens.app :refer [app]]
+            [lens.server :refer [new-server]]
             [lens.store.atom :refer [create-atom]]
             [lens.store.riak :refer [create-riak]]
-            [com.stuartsierra.component :as component]
+            [com.stuartsierra.component :as comp]
             [lens.auth.noop :refer [create-noop]]
             [lens.auth.ldap :refer [create-ldap]]))
 
-(defn- ensure-facing-separator [path]
-  (if (.startsWith path "/")
-    path
-    (str "/" path)))
-
-(defn- remove-trailing-separator [path]
-  (if (.endsWith path "/")
-    (subs path 0 (dec (count path)))
-    path))
-
-(defn- parse-path [path]
-  (if (= "/" path)
-    path
-    (-> path ensure-facing-separator remove-trailing-separator)))
-
 (defn- create-token-store [{:keys [token-store] :as env}]
-  (case (some-> token-store .toLowerCase)
-    "riak" (create-riak env)
-    (create-atom env)))
-
-(defn- assoc-token-store [env]
-  (assoc env :token-store (create-token-store env)))
+  (let [env (update env :expire (fnil parse-long "3600"))]
+    (case (some-> token-store .toLowerCase)
+      "riak" (create-riak env)
+      (create-atom env))))
 
 (defn- create-authenticator [{:keys [auth] :as env}]
   (case (some-> auth .toLowerCase)
     "ldap" (create-ldap env)
     (create-noop)))
 
-(defn- assoc-authenticator [env]
-  (assoc env :authenticator (create-authenticator env)))
-
-(defn create [env]
-  (-> (assoc env :app app)
-      (assoc :version (:lens-auth-version env))
-      (update :expire (fnil parse-long "3600"))
-      (update :riak-port (fnil parse-long "8098"))
-      (update :riak-bucket (fnil identity "auth"))
-      (assoc-token-store)
-      (assoc-authenticator)
-      (update :context-path (fnil parse-path "/"))
-      (update :ip (fnil identity "0.0.0.0"))
-      (update :port (fnil parse-long "80"))
-      (update :thread (fnil parse-long "4"))))
-
-(defnk start [app port & more :as system]
-  (assert (nil? (:stop-fn system)) "System already started.")
-  (let [more (update more :token-store component/start)
-        more (update more :authenticator component/start)
-        stop-fn (run-server (app more) {:port port})]
-    (assoc system :stop-fn stop-fn)))
-
-(defn stop [{:keys [stop-fn] :as system}]
-  (stop-fn)
-  (dissoc system :stop-fn))
+(defnk new-system [lens-auth-version :as env]
+  (comp/system-map
+    :version lens-auth-version
+    :token-store (create-token-store env)
+    :authenticator (create-authenticator env)
+    :server (comp/using (new-server env) [:token-store :authenticator])))

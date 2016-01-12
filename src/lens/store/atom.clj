@@ -6,7 +6,7 @@
             [lens.util :refer [now]]
             [lens.store.expire :refer [expired? Sec]]))
 
-(deftype Atom [expire db]
+(defrecord Atom [expire db]
   component/Lifecycle
   (start [_]
     (Atom. expire (atom {})))
@@ -15,12 +15,12 @@
     (Atom. expire nil))
 
   TokenStore
-  (put! [_ token user-info]
+  (put-token! [_ token user-info]
     (let [expires (+ (now) expire)
           value (assoc user-info :expires expires)]
       (swap! db #(assoc % token value))))
 
-  (get [_ token]
+  (get-token [_ token]
     (let [user-info (get-in @db [token])]
       (if (expired? user-info)
         (do (swap! db #(dissoc % token)) nil)

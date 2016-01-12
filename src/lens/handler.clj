@@ -55,7 +55,7 @@
     :post!
     (fnk [[:request [:params username]]]
       (let [token (str (UUID/randomUUID))]
-        (store/put! token-store token {:username username})
+        (store/put-token! token-store token {:username username})
         {:token token}))
 
     :as-response
@@ -83,7 +83,7 @@
 
     :post!
     (fnk [[:request [:params token]]]
-      (if-letk [[username] (store/get token-store token)]
+      (if-letk [[username] (store/get-token token-store token)]
         {::resp
          {:active true
           :username username}}

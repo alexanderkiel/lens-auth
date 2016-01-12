@@ -1,6 +1,7 @@
 (ns lens.core
   (:use plumbing.core)
-  (:require [environ.core :refer [env]]
+  (:require [com.stuartsierra.component :as comp]
+            [environ.core :refer [env]]
             [lens.system :as system]
             [lens.descriptive :refer [describe]]))
 
@@ -10,15 +11,16 @@
 (defn- available-processors []
   (.availableProcessors (Runtime/getRuntime)))
 
-(defn -main [& args]
-  (letk [[ip port thread version context-path token-store authenticator expire :as system] (system/create env)]
-    (system/start system)
+(defn -main [& _]
+  (letk [[version [:server ip port context-path thread] token-store
+          authenticator :as system] (system/new-system env)]
+    (comp/start system)
     (println "Version:" version)
     (println "Max Memory:" (max-memory) "MB")
     (println "Num CPUs:" (available-processors))
     (println "Context Path:" context-path)
     (println "Token store:" (describe token-store))
-    (println "Generated tokens will expire after" expire "seconds")
+    (println "Generated tokens will expire after" (:expire token-store) "ms")
     (println "Authenticator:" (describe authenticator))
     (println "Server started")
     (println "Listen at" (str ip ":" port))

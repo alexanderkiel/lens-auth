@@ -2,8 +2,9 @@
   (:require [clojure.pprint :refer [pprint pp]]
             [clojure.repl :refer :all]
             [clojure.tools.namespace.repl :refer [refresh]]
+            [com.stuartsierra.component :as comp]
             [environ.core :refer [env]]
-            [lens.system :as system]
+            [lens.system :refer [new-system]]
             [schema.core :as s]))
 
 (s/set-fn-validation! true)
@@ -11,23 +12,29 @@
 (def system nil)
 
 (defn init []
-  (alter-var-root #'system #(if-not % (system/create env) %)))
+  (when-not system (alter-var-root #'system (constantly (new-system env)))))
 
 (defn start []
-  (alter-var-root #'system system/start))
+  (alter-var-root #'system comp/start))
 
 (defn stop []
-  (alter-var-root #'system system/stop))
+  (alter-var-root #'system comp/stop))
 
 (defn startup []
   (init)
   (start)
-  (println "Server running at port" (:port system)))
+  (println "Server running at port" (:port (:server system))))
 
 (defn reset []
   (stop)
   (refresh :after 'user/startup))
 
+;; Init Development
 (comment
   (startup)
-  (reset))
+  )
+
+;; Reset after making changes
+(comment
+  (reset)
+  )

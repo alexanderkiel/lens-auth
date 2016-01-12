@@ -18,7 +18,22 @@
      ;Workaround for https://github.com/clojure-liberator/liberator/issues/94
      (ring-response {:error error} {:status 400}))})
 
-(defnk token-handler [token-store authenticator]
+(defnk token-handler
+  "Implements the token endpoint as described in RFC 6749 Section 4.3.2.
+
+  The following request parameters are supported:
+
+    grant_type - Value MUST be set to \"password\".
+    username   - The resource owner username.
+    password   - The resource owner password.
+
+  Client authentication is not supported.
+
+  Returns a JSON response containing a map with the following keys:
+
+    access_token - The access token issued by the authorization server.
+    token_type   - Currently always \"bearer\""
+  [token-store authenticator]
   (resource
     resource-defaults
 

@@ -30,5 +30,7 @@
   (describe [_]
     "in-memory atom (ephemeral)"))
 
-(defnk create-atom [expire :- Sec]
+(defnk create-atom
+  "Creates an atom token store."
+  [expire :- Sec]
   (->Atom (* expire 1000) nil))

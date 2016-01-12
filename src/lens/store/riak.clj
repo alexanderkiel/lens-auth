@@ -53,5 +53,7 @@
   (describe [_]
     (str "riak endpoint: " endpoint ", bucket: " bucket)))
 
-(defnk create-riak [riak-host riak-port riak-bucket expire :- Sec]
+(defnk create-riak
+  "Creates a Riak token store."
+  [riak-host riak-port riak-bucket expire :- Sec]
   (->Riak (riak-endpoint riak-host riak-port) riak-bucket (* expire 1000)))

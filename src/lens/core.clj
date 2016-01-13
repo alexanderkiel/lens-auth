@@ -12,7 +12,7 @@
   (.availableProcessors (Runtime/getRuntime)))
 
 (defn -main [& _]
-  (letk [[version [:server ip port context-path thread] token-store
+  (letk [[version [:server ip port context-path thread] token-store client-store
           authenticator :as system] (system/new-system env)]
     (comp/start system)
     (println "Version:" version)
@@ -21,6 +21,7 @@
     (println "Context Path:" context-path)
     (println "Token store:" (describe token-store))
     (println "Generated tokens will expire after" (:expire token-store) "ms")
+    (println "Client store:" (describe client-store))
     (println "Authenticator:" (describe authenticator))
     (println "Server started")
     (println "Listen at" (str ip ":" port))

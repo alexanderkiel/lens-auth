@@ -1,6 +1,6 @@
-(ns lens.store.expire-test
+(ns lens.token-store.expire-test
   (:require [clojure.test :refer :all]
-            [lens.store.expire :refer :all]
+            [lens.token-store.expire :refer :all]
             [lens.util :refer [now]]))
 
 (deftest expired?-test

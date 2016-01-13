@@ -5,13 +5,14 @@
             [lens.app :refer [app]]
             [lens.util :as u]))
 
-(defrecord Server [version port context-path thread token-store
+(defrecord Server [version port context-path thread token-store client-store
                    authenticator stop-fn]
   Lifecycle
   (start [server]
     (let [handler (app {:version version
                         :context-path context-path
                         :token-store token-store
+                        :client-store client-store
                         :authenticator authenticator})
           opts {:port port :thread thread}]
       (assoc server :stop-fn (run-server handler opts))))

@@ -1,13 +1,13 @@
-(ns lens.store.riak
+(ns lens.token-store.riak
   (:use plumbing.core)
-  (:require [lens.store :refer [TokenStore]]
+  (:require [lens.token-store :refer [TokenStore]]
             [lens.descriptive :refer [Descriptive]]
             [org.httpkit.client :as http]
             [clojure.string :as str]
-            [com.stuartsierra.component :as component]
+            [com.stuartsierra.component :as comp]
             [clojure.data.json :as json]
-            [lens.util :as u :refer [now]]
-            [lens.store.expire :refer [expired? Sec]]))
+            [lens.util :refer [now]]
+            [lens.token-store.expire :refer [expired? Sec]]))
 
 (defn- riak-endpoint [host port]
   (str "http://" host ":" port "/riak"))
@@ -33,7 +33,7 @@
     @(http/delete key-url)))
 
 (defrecord Riak [endpoint bucket expire]
-  component/Lifecycle
+  comp/Lifecycle
   (start [this]
     this)
 
@@ -57,5 +57,7 @@
 
 (defnk create-riak
   "Creates a Riak token store."
-  [riak-host {riak-port "8098"} {riak-bucket "auth"} expire :- Sec]
-  (->Riak (riak-endpoint riak-host riak-port) riak-bucket (* expire 1000)))
+  [riak-token-host {riak-token-port "8098"} {riak-token-bucket "auth-tokens"}
+   expire :- Sec]
+  (->Riak (riak-endpoint riak-token-host riak-token-port) riak-token-bucket
+          (* expire 1000)))

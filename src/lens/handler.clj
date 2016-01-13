@@ -2,8 +2,10 @@
   (:use plumbing.core)
   (:require [liberator.core :refer [resource]]
             [liberator.representation :refer [as-response ring-response]]
-            [lens.store :as store]
-            [lens.auth :as auth])
+            [lens.token-store :as ts]
+            [lens.client-store :as cs]
+            [lens.auth :as auth]
+            [hiccup.core :refer [html]])
   (:import [java.util UUID]))
 
 (def resource-defaults
@@ -55,7 +57,7 @@
     :post!
     (fnk [[:request [:params username]]]
       (let [token (str (UUID/randomUUID))]
-        (store/put-token! token-store token {:username username})
+        (ts/put-token! token-store token {:username username})
         {:token token}))
 
     :as-response
@@ -68,6 +70,69 @@
     (fnk [token]
       {:access_token token
        :token_type "bearer"})))
+
+(defn location [redirect-error request]
+  (letk [[[:params redirect_uri {state nil}]] request]
+    (cond-> (str redirect_uri "#error=" redirect-error)
+      state (str "&state=" state))))
+
+(defnk authorization-handler
+  "Implements the authorization endpoint as described in RFC 6749 Section 4.2.1.
+
+  The following request parameters are supported:
+
+    response_type - Value MUST be set to \"token\".
+    client_id     - The client identifier as described in Section 2.2.
+    redirect_uri  - As described in Section 3.1.2.
+    state         - An opaque value used by the client to maintain state between
+                    the request and callback. (optional)"
+  [client-store]
+  (resource
+    :available-media-types ["text/html"]
+    :allowed-methods [:get]
+
+    :processable?
+    (fnk [[:request params]]
+      (let [{:keys [response_type client_id redirect_uri]} params]
+        (if-letk [[redirect-uris] (cs/get-client client-store client_id)]
+          (if (some #(= redirect_uri %) redirect-uris)
+            (if (= "token" response_type)
+              true
+              [false {:redirect-error "unsupported_response_type"}])
+            [false {:user-error (str "Invalid redirection URI.")}])
+          [false {:user-error "Invalid client identifier."}])))
+
+    :handle-ok
+    (fnk [[:request [:params client_id redirect_uri {state nil}]]]
+      (html
+        [:html
+         [:head [:title "Sign In"]]
+         [:body
+          [:h1 "Sign In"]
+          [:form {:method "POST" :action (str "sign-in")}
+           [:input {:type "hidden" :name "client_id" :value client_id}]
+           [:input {:type "hidden" :name "redirect_uri" :value redirect_uri}]
+           (when state [:input {:type "hidden" :name "state" :value state}])
+           [:input {:type "text" :name "username"}]
+           [:input {:type "password" :name "password"}]
+           [:button {:type "submit"} "Sign In"]]]]))
+
+    :handle-unprocessable-entity
+    (fn [{:keys [user-error redirect-error request]}]
+      (if user-error
+        (ring-response
+          (html
+            [:body
+             [:h1 "Fehler"]
+             [:p user-error]])
+          {:status 200})
+        (ring-response
+          (html
+            [:body
+             [:h1 "Fehler"]
+             [:p user-error]])
+          {:status 302
+           :headers {"Location" (location redirect-error request)}})))))
 
 (defnk introspect-handler [token-store]
   (resource
@@ -83,7 +148,7 @@
 
     :post!
     (fnk [[:request [:params token]]]
-      (if-letk [[username] (store/get-token token-store token)]
+      (if-letk [[username] (ts/get-token token-store token)]
         {::resp
          {:active true
           :username username}}
@@ -92,6 +157,60 @@
 
     :handle-ok ::resp))
 
+(defnk sign-in-handler [token-store client-store authenticator]
+  (resource
+    :available-media-types ["text/html"]
+    :allowed-methods [:post]
+    :new? false
+    :respond-with-entity? true
+
+    :processable?
+    (fnk [[:request params]]
+      (let [{:keys [client_id redirect_uri]} params]
+        (if-letk [[redirect-uris] (cs/get-client client-store client_id)]
+          (if (some #(= redirect_uri %) redirect-uris)
+            true
+            [false {:error (str "Invalid redirection URI.")}])
+          [false {:error "Invalid client identifier."}])))
+
+    :post-redirect?
+    (fnk [[:request [:params username password]]]
+      (when (auth/check-credentials authenticator username password)
+        (let [token (str (UUID/randomUUID))]
+          (ts/put-token! token-store token {:username username})
+          {:token token})))
+
+    :location
+    (fnk [[:request [:params redirect_uri {state nil}]] token]
+      (cond-> (str redirect_uri "#access_token=" token "&token_type=bearer")
+        state (str "&state=" state)))
+
+    :handle-ok
+    (fnk [[:request [:params client_id redirect_uri {state nil} username]]]
+      (html
+        [:html
+         [:head [:title "Sign In"]]
+         [:body
+          [:h1 "Sign In"]
+          [:form {:method "POST" :action (str "sign-in")}
+           [:input {:type "hidden" :name "client_id" :value client_id}]
+           [:input {:type "hidden" :name "redirect_uri" :value redirect_uri}]
+           (when state [:input {:type "hidden" :name "state" :value state}])
+           [:input {:type "text" :name "username" :value username}]
+           [:input {:type "password" :name "password"}]
+           [:button {:type "submit"} "Sign In"]]]]))
+
+    :handle-unprocessable-entity
+    (fnk [error]
+      (ring-response
+        (html
+          [:body
+           [:h1 "Fehler"]
+           [:p error]])
+        {:status 200}))))
+
 (defn handlers [ctx]
   {:token (token-handler ctx)
-   :introspect (introspect-handler ctx)})
+   :authorization (authorization-handler ctx)
+   :introspect (introspect-handler ctx)
+   :sign-in (sign-in-handler ctx)})

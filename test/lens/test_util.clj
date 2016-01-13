@@ -1,5 +1,5 @@
 (ns lens.test-util
-  (:require [lens.store.atom :refer [->Atom]]
+  (:require [lens.token-store.atom :refer [->Atom]]
             [lens.auth.noop :refer [->Noop]]
             [lens.auth :refer [Authenticator]]))
 

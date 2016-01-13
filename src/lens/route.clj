@@ -3,4 +3,6 @@
 (defn routes [context-path]
   [(if (= "/" context-path) "" context-path)
    {"/token" :token
-    "/introspect" :introspect}])
+    "/authorization" :authorization
+    "/introspect" :introspect
+    "/sign-in" :sign-in}])

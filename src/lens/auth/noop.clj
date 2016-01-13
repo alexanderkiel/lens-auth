@@ -1,10 +1,10 @@
 (ns lens.auth.noop
-  (:require [com.stuartsierra.component :as component]
+  (:require [com.stuartsierra.component :as comp]
             [lens.auth :refer [Authenticator]]
             [lens.descriptive :refer [Descriptive]]))
 
 (deftype Noop []
-  component/Lifecycle
+  comp/Lifecycle
   (start [this]
     this)
 

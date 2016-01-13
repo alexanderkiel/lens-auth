@@ -1,4 +1,4 @@
-(ns lens.store.expire
+(ns lens.token-store.expire
   (:require [lens.util :refer [now]]
             [schema.core :as s]))
 

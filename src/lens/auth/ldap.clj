@@ -1,13 +1,13 @@
 (ns lens.auth.ldap
   (:use plumbing.core)
   (:require [clj-ldap.client :as ldap]
-            [com.stuartsierra.component :as component]
+            [com.stuartsierra.component :as comp]
             [lens.auth :refer [Authenticator]]
             [lens.descriptive :refer [Descriptive]]
             [clojure.string :as str]))
 
 (deftype Ldap [hosts base-dn conn]
-  component/Lifecycle
+  comp/Lifecycle
   (start [_]
     (Ldap. hosts base-dn (ldap/connect {:host hosts})))
 

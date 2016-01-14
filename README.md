@@ -38,7 +38,10 @@ This application uses the following environment vars:
 * `EXPIRE` - the time in seconds after which a token expires
 * `AUTH` - how to check user credentials, currently `noop` (all credentials are valid) and `ldap` are supported (defaults to `noop`)
 * `LDAP_HOSTS` - the host or hosts (comma separated) to use for ldap connect, **must** be specified if auth is `ldap`
-* `LDAP_USER_BASE_DN` - the ldap base [dn](https://www.ldap.com/ldap-dns-and-rdns) to locate users,**must** be specified if auth is `ldap`
+* `LDAP_USER_BASE_DN` - the ldap base [dn](https://www.ldap.com/ldap-dns-and-rdns) to locate users, **must** be specified if auth is `ldap`
+* `LDAP_BIND_DN` - the server connects to ldap using this user dn, **must** be specified if auth is `ldap`
+* `LDAP_BIND_PASSWORD` - the server connects to ldap using this password, **must** be specified if auth is `ldap`
+* `LDAP_SEARCH_TPL` - the filter string template used to find users (defaults to `(sAMAccountName=%s)`)
 * `CLIENT_STORE` - how to store the generated tokens. Currently `atom` and `riak` are supported (defaults to `atom`)
 * `RIAK_CLIENT_HOST` - **Must** be specified if client-store is `riak`
 * `RIAK_CLIENT_PORT` - the Riak HTTP port (defaults to `8098`)

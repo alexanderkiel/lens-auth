@@ -49,13 +49,13 @@
           (not= "password" grant_type)
           [false {:error "unsupported_grant_type"}]
 
-          (not (auth/check-credentials authenticator username password))
-          [false {:error "invalid_grant"}]
-
-          :else true)))
+          :else
+          (if-let [user-info (auth/check-credentials authenticator username password)]
+            {:user-info user-info}
+            [false {:error "invalid_grant"}]))))
 
     :post!
-    (fnk [[:request [:params username]]]
+    (fnk [[:user-info username]]
       (let [token (str (UUID/randomUUID))]
         (ts/put-token! token-store token {:username username})
         {:token token}))
@@ -175,9 +175,9 @@
 
     :post-redirect?
     (fnk [[:request [:params username password]]]
-      (when (auth/check-credentials authenticator username password)
+      (when-let [user-info (auth/check-credentials authenticator username password)]
         (let [token (str (UUID/randomUUID))]
-          (ts/put-token! token-store token {:username username})
+          (ts/put-token! token-store token user-info)
           {:token token})))
 
     :location

@@ -19,10 +19,11 @@
     (Ldap. hosts base-dn bind-dn bind-pw search-tpl nil))
 
   Authenticator
-  (check-credentials [_ username password]
+  (check-credentials* [_ username password]
     (let [opts (assoc search-opts :filter (format search-tpl username))
           user (first (ldap/search conn base-dn opts))]
-      (and user (ldap/bind? conn (:dn user) password))))
+      (when (and user (ldap/bind? conn (:dn user) password))
+        {:username (:sAMAccountName user)})))
 
   Descriptive
   (describe [_]

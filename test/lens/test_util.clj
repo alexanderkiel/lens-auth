@@ -24,5 +24,6 @@
 
 (deftype NoopWith [response]
   Authenticator
-  (check-credentials [_ _ _]
-    response))
+  (check-credentials* [_ username _]
+    (when response
+      {:username username})))

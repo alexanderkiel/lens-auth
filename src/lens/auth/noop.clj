@@ -12,8 +12,8 @@
     this)
 
   Authenticator
-  (check-credentials [_ _ _]
-    true)
+  (check-credentials* [_ username _]
+    {:username username})
 
   Descriptive
   (describe [_]

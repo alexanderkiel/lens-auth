@@ -4,16 +4,16 @@
 
   :min-lein-version "2.0.0"
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/data.json "0.2.6"]
-                 [environ "1.0.0"]
+                 [environ "1.0.1"]
                  [org.clojure/tools.reader "0.9.2"]
                  [prismatic/plumbing "0.5.2"]
                  [prismatic/schema "1.0.4"]
                  [http-kit "2.1.18"]
-                 [ring/ring-core "1.3.2"]
+                 [ring/ring-core "1.4.0"]
                  [pathetic "0.5.1"]
-                 [bidi "1.20.2" :exclusions [org.clojure/clojurescript
+                 [bidi "1.25.0" :exclusions [org.clojure/clojurescript
                                              com.cemerick/clojurescript.test]]
                  [liberator "0.13"]
                  [com.stuartsierra/component "0.3.0"]

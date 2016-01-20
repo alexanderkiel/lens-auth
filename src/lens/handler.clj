@@ -76,6 +76,9 @@
     (cond-> (str redirect_uri "#error=" redirect-error)
       state (str "&state=" state))))
 
+(defn- html-head [title]
+  [:head [:title title]])
+
 (defnk authorization-handler
   "Implements the authorization endpoint as described in RFC 6749 Section 4.2.1.
 
@@ -106,7 +109,7 @@
     (fnk [[:request [:params client_id redirect_uri {state nil}]]]
       (html
         [:html
-         [:head [:title "Sign In"]]
+         (html-head "Sign In")
          [:body
           [:h1 "Sign In"]
           [:form {:method "POST" :action (str "sign-in")}
@@ -122,9 +125,11 @@
       (if user-error
         (ring-response
           (html
-            [:body
-             [:h1 "Fehler"]
-             [:p user-error]])
+            [:html
+             (html-head "Sign-In")
+             [:body
+              [:h1 "Fehler"]
+              [:p user-error]]])
           {:status 200})
         (ring-response
           (html
@@ -189,7 +194,7 @@
     (fnk [[:request [:params client_id redirect_uri {state nil} username]]]
       (html
         [:html
-         [:head [:title "Sign In"]]
+         (html-head "Sign In")
          [:body
           [:h1 "Sign In"]
           [:form {:method "POST" :action (str "sign-in")}
@@ -204,9 +209,11 @@
     (fnk [error]
       (ring-response
         (html
-          [:body
-           [:h1 "Fehler"]
-           [:p error]])
+          [:html
+           (html-head "Sign In")
+           [:body
+            [:h1 "Fehler"]
+            [:p error]]])
         {:status 200}))))
 
 (defn handlers [ctx]

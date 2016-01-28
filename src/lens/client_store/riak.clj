@@ -35,7 +35,7 @@
 
   ClientStore
   (get-client [_ client-id]
-    (riak-get endpoint bucket client-id))
+    (when client-id (riak-get endpoint bucket client-id)))
 
   (put-client! [_ client-id client]
     (riak-put! endpoint bucket client-id client))

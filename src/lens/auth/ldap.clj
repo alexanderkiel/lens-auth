@@ -29,8 +29,11 @@
   (describe [_]
     (str "ldap on " hosts " and user-base: " base-dn)))
 
+(defn split-hosts [ldap-hosts]
+  (str/split (str/trim ldap-hosts) #"[\s,]+"))
+
 (defnk create-ldap [ldap-hosts ldap-bind-dn ldap-bind-password ldap-user-base-dn
                     {ldap-search-tpl "(sAMAccountName=%s)"}]
-  (let [hosts (str/split (str/trim ldap-hosts) #"[\s,]")]
+  (let [hosts (split-hosts ldap-hosts)]
     (->Ldap hosts ldap-user-base-dn ldap-bind-dn ldap-bind-password
             ldap-search-tpl nil)))

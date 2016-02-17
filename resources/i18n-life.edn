@@ -1,0 +1,6 @@
+{:sign-in-title "LIFE Anmeldeserver"
+ :navbar-brand-label "LIFE Anmeldeserver"
+ :username "Benutzername"
+ :password "Passwort"
+ :sign-in-button-label "Anmelden"
+ :wrong-credentials-msg "Benutzername und Passwort stimmen nicht überein."}

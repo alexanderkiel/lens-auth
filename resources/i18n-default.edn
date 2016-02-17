@@ -1,0 +1,6 @@
+{:sign-in-title "Sign In"
+ :navbar-brand-label "Sign In"
+ :username "Username"
+ :password "Password"
+ :sign-in-button-label "Sign In"
+ :wrong-credentials-msg "Wrong username or password."}

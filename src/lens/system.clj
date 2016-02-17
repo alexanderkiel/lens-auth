@@ -28,11 +28,12 @@
     "ldap" (create-ldap env)
     (create-noop)))
 
-(defnk new-system [lens-auth-version :as env]
+(defnk new-system [lens-auth-version {i18n-name "default"} :as env]
   (comp/system-map
     :version lens-auth-version
     :token-store (create-token-store env)
     :client-store (create-client-store env)
     :authenticator (create-authenticator env)
+    :i18n-name i18n-name
     :server (comp/using (new-server env) [:token-store :client-store
-                                          :authenticator])))
+                                          :authenticator :i18n-name])))

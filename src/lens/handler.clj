@@ -1,12 +1,12 @@
 (ns lens.handler
   (:use plumbing.core)
-  (:require [liberator.core :refer [resource]]
+  (:require [clojure.string :as str]
+            [liberator.core :refer [resource]]
             [liberator.representation :refer [as-response ring-response]]
             [lens.token-store :as ts]
             [lens.client-store :as cs]
             [lens.auth :as auth]
-            [hiccup.core :refer [html]]
-            [clojure.string :as str])
+            [hiccup.core :refer [html]])
   (:import [java.util UUID]))
 
 (def resource-defaults
@@ -91,43 +91,45 @@
    [:style "body {margin-top: 72px}"]
    [:title title]])
 
-(defn render-header []
+(defn render-header [i18n]
   [:header {:class "navbar navbar-default navbar-fixed-top"}
    [:div {:class "container-fluid"}
     [:div {:class "navbar-header"}
-     [:a {:href "#" :class "navbar-brand"} "Login"]]]])
+     [:a {:href "#" :class "navbar-brand"} (i18n :navbar-brand-label)]]]])
 
-(defn render-sign-in-form [client_id redirect_uri state username 
+(defn render-sign-in-form [path-for i18n client_id redirect_uri state username 
                            wrong-credentials]
-  [:form {:method "POST" :action (str "sign-in")}
+  [:form {:method "POST" :action (path-for :sign-in)}
    [:input {:type "hidden" :name "client_id" :value client_id}]
    [:input {:type "hidden" :name "redirect_uri" :value redirect_uri}]
    (when state [:input {:type "hidden" :name "state" :value state}])
    [:div {:class (cond-> "form-group" wrong-credentials (str " has-error"))}
-    [:label {:for "username" :class "control-label"} "Username"]
+    [:label {:for "username" :class "control-label"} (i18n :username)]
     [:input {:type "text" :id "username" :name "username"
              :class "form-control" :autofocus "autofocus" :value username}]]
    [:div {:class (cond-> "form-group" wrong-credentials (str " has-error"))}
-    [:label {:for "password" :class "control-label"} "Password"]
+    [:label {:for "password" :class "control-label"} (i18n :password)]
     [:input {:type "password" :id "password" :name "password"
              :class "form-control"}]
     (when wrong-credentials
-      [:span {:class "help-block"} "Wrong username or password."])]
-   [:button {:type "submit" :class "btn btn-default"} "Sign In"]])
+      [:span {:class "help-block"} (i18n :wrong-credentials-msg)])]
+   [:button {:type "submit" :class "btn btn-default"} 
+    (i18n :sign-in-button-label)]])
 
-(defn render-sign-in-page [client_id redirect_uri state username 
+(defn render-sign-in-page [path-for i18n client_id redirect_uri state username 
                            wrong-credentials]
   (html
     [:html
-     (html-head "Sign In")
+     (html-head (i18n :sign-in-title))
      [:body
-      (render-header)
+      (render-header i18n)
       [:div {:class "container"}
        [:div {:class "row"}
-        [:div {:class "col-xs-12 col-sm-offset-3 col-sm-6 col-md-offset-4 col-md-4"}
-         [:h1 "Sign In"]
-         (render-sign-in-form client_id redirect_uri state username 
-                              wrong-credentials)]]]]]))
+        [:div {:class 
+               "col-xs-12 col-sm-offset-3 col-sm-6 col-md-offset-4 col-md-4"}
+         [:h1 (i18n :sign-in-title)]
+         (render-sign-in-form path-for i18n client_id redirect_uri state 
+                              username wrong-credentials)]]]]]))
 
 (defnk authorization-handler
   "Implements the authorization endpoint as described in RFC 6749 Section 4.2.1.
@@ -139,7 +141,7 @@
     redirect_uri  - As described in Section 3.1.2.
     state         - An opaque value used by the client to maintain state between
                     the request and callback. (optional)"
-  [client-store]
+  [client-store i18n]
   (resource
     :available-media-types ["text/html"]
     :allowed-methods [:get]
@@ -156,9 +158,9 @@
           [false {:user-error "Invalid client identifier."}])))
 
     :handle-ok
-    (fnk [[:request [:params client_id redirect_uri {state nil} {username nil}
-                     {wrong_credentials false}]]]
-      (render-sign-in-page client_id redirect_uri state username 
+    (fnk [[:request path-for [:params client_id redirect_uri {state nil} 
+                              {username nil} {wrong_credentials false}]]]
+      (render-sign-in-page path-for i18n client_id redirect_uri state username 
                            wrong_credentials))
 
     :handle-unprocessable-entity
